@@ -35,15 +35,14 @@ jobs:
       - name: build and push docker image to ecr
         env:
           # ECR レジストリを `aws-actions/amazon-ecr-login` アクションの `outputs.registry` から取得
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           # イメージを push する ECR リポジトリ名
-          REPOSITORY: "my-ecr-repository"
+          ECR_REPOSITORY: "my-ecr-repository"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
-          IMAGE_TAG: ${{ github.sha }}
+          ECR_IMAGE_TAG: ${{ github.sha }}
         run: |
           docker buildx build . \
             --platform linux/arm64 \
             --push                  \
-            --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
-        # docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+            --tag ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}
