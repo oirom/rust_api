@@ -1,0 +1,48 @@
+name: "GitHub Actions: workflows on dev branch"
+
+on:
+  push:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+         - linux/arm64
+    steps:
+      - uses: actions/checkout@v3
+
+      # AWS 認証
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: "ap-northeast-1"
+          role-to-assume: "arn:aws:iam::278389473221:role/github-actions-role"
+
+      # ECR ログイン
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr # outputs で参照するために id を設定
+
+      - name: set up docker buildx
+        run: |
+          docker buildx create --use
+
+      # Docker イメージを build・push する
+      - name: build and push docker image to ecr
+        env:
+          # ECR レジストリを `aws-actions/amazon-ecr-login` アクションの `outputs.registry` から取得
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          # イメージを push する ECR リポジトリ名
+          ECR_REPOSITORY: "my-ecr-repository"
+          # 任意のイメージタグ
+          # 今回は Git のコミットハッシュにしておく
+          ECR_IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker buildx build . \
+            --platform linux/arm64 \
+            --push                  \
+            --tag ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}
