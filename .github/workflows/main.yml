@@ -1,4 +1,4 @@
-name: push image to ecr
+name: "GitHub Actions: workflows on dev branch"
 
 on:
   push:
