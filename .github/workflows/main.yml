@@ -27,8 +27,9 @@ jobs:
       - uses: aws-actions/amazon-ecr-login@v1
         id: login-ecr # outputs で参照するために id を設定
 
-      - name: set up qemu
-        uses: docker/setup-qemu-action@v2
+      - name: set up docker buildx
+        run: |
+          docker buildx create --use
 
       # Docker イメージを build・push する
       - name: build and push docker image to ecr
@@ -41,5 +42,5 @@ jobs:
           # 今回は Git のコミットハッシュにしておく
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker buildx build . --platform linux/arm64 --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
