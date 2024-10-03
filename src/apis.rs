@@ -2,7 +2,9 @@ use actix_web::{get, web, HttpResponse, Responder};
 
 #[get("/")]
 async fn hello() -> impl Responder {
-  HttpResponse::Ok().body("Hello, world! This is rust api server.")
+  HttpResponse::Ok()
+    .content_type("application/json")
+    .body(r#"{"name":"Taro, Tanaka", "age":10}"#)
 }
 
 #[get("/technologies/{tech_name}")]
