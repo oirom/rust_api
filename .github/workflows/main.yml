@@ -44,5 +44,5 @@ jobs:
         run: |
           docker buildx build . \
             --platform linux/arm64 \
-            --push                  \
+            --push \
             --tag ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.ECR_IMAGE_TAG }}

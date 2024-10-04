@@ -1,4 +1,4 @@
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, Result};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -18,6 +18,16 @@ async fn hello() -> impl Responder {
     })
 }
 
+#[get("/hello/{name}")]
+async fn hello2(name: web::Path<String>) -> Result<impl Responder> {
+  let person = Person {
+    name: name.to_string(),
+    age: 20,
+    hobbies: vec!["programming".to_string(), "music".to_string()],
+  };
+  Ok(web::Json(person))
+}
+
 #[get("/technologies/{tech_name}")]
 async fn get_technologiy_page(
   tech_name: web::Path<String>) -> impl Responder {
@@ -35,6 +45,7 @@ pub async fn create_app(addr: &str, port: u16) -> std::io::Result<()> {
   HttpServer::new(|| {
     App::new()
       .service(hello)
+      .service(hello2)
       .service(get_technologiy_page)
     })
     .bind((addr, port))?
